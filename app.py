@@ -96,9 +96,18 @@ if address_input:
             folium.Marker([location.latitude, location.longitude], icon=folium.Icon(color="red", icon="home")).add_to(m)
             # 1 folium.GeoJson(intersecting_das, style_function=lambda x: {'fillColor': '#2980b9' if str(x['properties']['DAUID']) != str(subject_da_id) else '#e74c3c'},
             # 2               tooltip=folium.GeoJsonTooltip(fields=['DAUID', selected_metric], aliases=['DA:', f'{metric_labels[selected_metric]}:'])).add_to(m)
-folium.GeoJson(intersecting_das,style_function=lambda x: {'fillColor': '#2980b9' if str(x['properties']['DAUID']) != str(subject_da_id) else '#e74c3c',
-        'pointer-events': 'none' # This prevents click events while keeping the shape visible},tooltip=folium.GeoJsonTooltip(fields=['DAUID', selected_metric], 
-        aliases=['DA:', f'{metric_labels[selected_metric]}:']),popup=None).add_to(m)
+folium.GeoJson(
+    intersecting_das,
+    style_function=lambda x: {
+        'fillColor': '#2980b9' if str(x['properties']['DAUID']) != str(subject_da_id) else '#e74c3c',
+        'pointer-events': 'none'
+    },
+    tooltip=folium.GeoJsonTooltip(
+        fields=['DAUID', selected_metric], 
+        aliases=['DA:', f'{metric_labels[selected_metric]}:']
+    ),
+    popup=None
+).add_to(m)
           
             st_folium(m, width="100%", height=400)
 
