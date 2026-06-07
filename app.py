@@ -40,6 +40,7 @@ def load_provincial_sharded_data(province_name):
     if not prov_id:
         return None
     
+    # URL construction
     base_url = "https://github.com/augustapplause/python-project/releases/download/v1.0/"
     file_url = f"{base_url}da_province_{prov_id}.geojson"
     
@@ -68,6 +69,7 @@ radius_km = st.sidebar.slider("Radius (km):", 0.5, 10.0, 1.0, step=0.5)
 
 selected_metric = st.sidebar.selectbox("Tooltip Metric:", list(metric_labels.keys()), format_func=lambda x: metric_labels[x])
 
+# Geocoding and Mapping
 geolocator = ArcGIS(user_agent="can_da_census_v15")
 if address_input:
     location = geolocator.geocode(f"{address_input.strip()}, Canada")
@@ -93,22 +95,9 @@ if address_input:
             folium.Marker([location.latitude, location.longitude], icon=folium.Icon(color="red", icon="home")).add_to(m)
             
             folium.GeoJson(
-                intersecting_das,
-                style_function=lambda x: {
-                    'fillColor': '#2980b9' if str(x['properties']['DAUID']) != str(subject_da_id) else '#e74c3c',
-                    'color': 'black',
-                    'weight': 0.5,
-                    'fillOpacity': 0.6
-                },
-                highlight_function=lambda x: {
-                    'fillOpacity': 0.6,
-                    'weight': 0.5
-                },
-                tooltip=folium.GeoJsonTooltip(
-                    fields=['DAUID', selected_metric], 
-                    aliases=['DA:', f'{metric_labels[selected_metric]}:']
-                ),
-                popup=None
+                intersecting_das, 
+                style_function=lambda x: {'fillColor': '#2980b9' if str(x['properties']['DAUID']) != str(subject_da_id) else '#e74c3c'},
+                tooltip=folium.GeoJsonTooltip(fields=['DAUID', selected_metric], aliases=['DA:', f'{metric_labels[selected_metric]}:'])
             ).add_to(m)
             
             st_folium(m, width="100%", height=400)
