@@ -97,7 +97,8 @@ if address_input:
             #folium.GeoJson(intersecting_das, style_function=lambda x: {'fillColor': '#2980b9' if str(x['properties']['DAUID']) != str(subject_da_id) else '#e74c3c'},
             #                tooltip=folium.GeoJsonTooltip(fields=['DAUID', selected_metric], aliases=['DA:', f'{metric_labels[selected_metric]}:'])).add_to(m)
             folium.GeoJson(intersecting_das,style_function=lambda x: {'fillColor': '#2980b9' if str(x['properties']['DAUID']) != str(subject_da_id) else '#e74c3c'},
-    tooltip=folium.GeoJsonTooltip(fields=['DAUID', selected_metric], aliases=['DA:', f'{metric_labels[selected_metric]}:']), popup=None).add_to(m)
+    tooltip=folium.GeoJsonTooltip(fields=['DAUID', selected_metric], aliases=['DA:', f'{metric_labels[selected_metric]}:']), popup=None,
+    bubbling_mouse_events=False).add_to(m)
           
             st_folium(m, width="100%", height=400)
 
