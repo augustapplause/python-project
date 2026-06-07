@@ -66,7 +66,7 @@ def load_provincial_sharded_data(province_name):
 st.sidebar.header("Search & Analysis")
 address_input = st.sidebar.text_input("Address or Postal Code:", "50 Victoria St, Gatineau, Quebec")
 # radius_km = st.sidebar.slider("Radius (km):", 1, 50, 1)
-radius_km = st.sidebar.slider("Radius (km):", 0.5, 10, 1.0, step=0.5)
+radius_km = st.sidebar.slider("Radius (km):", 0.5, 10.0, 1.0, step=0.5)
 
 selected_metric = st.sidebar.selectbox("Tooltip Metric:", list(metric_labels.keys()), format_func=lambda x: metric_labels[x])
 
