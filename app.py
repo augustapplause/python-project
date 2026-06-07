@@ -9,9 +9,11 @@ import unicodedata
 import requests
 import io
 
+# Page configuration
 st.set_page_config(layout="wide")
 st.title("Canadian DA Radius & Census Analytics")
 
+# Constants
 metric_labels = {
     'Pop_Total': 'Total Population', 'Age_0_4': 'Children (Age 0-4)', 'Age_5_9': 'Children (Age 5-9)',
     'Pop_Seniors_65_Plus': 'Seniors (Age 65+)', 'Daily_Diff_Often': 'Daily Difficulties (Often)',
@@ -20,7 +22,12 @@ metric_labels = {
     'Commute_Transit_Walk_Bike': 'Sustainable Commuters (Transit/Walk/Bike)'
 }
 
-PROVINCE_ROUTER = {'ontario': '35', 'quebec': '24', 'british columbia': '59', 'alberta': '48', 'manitoba': '46', 'saskatchewan': '47', 'nova scotia': '12', 'new brunswick': '13', 'newfoundland and labrador': '10', 'prince edward island': '11', 'yukon': '60', 'northwest territories': '61', 'nunavut': '62'}
+PROVINCE_ROUTER = {
+    'ontario': '35', 'quebec': '24', 'british columbia': '59', 'alberta': '48', 
+    'manitoba': '46', 'saskatchewan': '47', 'nova scotia': '12', 'new brunswick': '13', 
+    'newfoundland and labrador': '10', 'prince edward island': '11', 'yukon': '60', 
+    'northwest territories': '61', 'nunavut': '62'
+}
 
 def strip_accents(text):
     if not text: return ""
@@ -33,34 +40,36 @@ def load_provincial_sharded_data(province_name):
     if not prov_id:
         return None
     
+    # URL construction
     base_url = "https://github.com/augustapplause/python-project/releases/download/v1.0/"
     file_url = f"{base_url}da_province_{prov_id}.geojson"
     
-    # Use headers to mimic a browser to prevent 404/blocking
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
     }
     
-    response = requests.get(file_url, headers=headers)
-    
-    if response.status_code == 200:
-        # Use io.BytesIO to pass the response content to geopandas
-        gdf = gpd.read_file(io.BytesIO(response.content))
-        if gdf.crs != "EPSG:4326": 
-            gdf = gdf.to_crs(epsg=4326)
-        _ = gdf.sindex
-        return gdf
-    else:
-        st.error(f"Error fetching data for {province_name}. Status: {response.status_code}")
+    try:
+        response = requests.get(file_url, headers=headers, timeout=10)
+        if response.status_code == 200:
+            gdf = gpd.read_file(io.BytesIO(response.content))
+            if gdf.crs != "EPSG:4326": gdf = gdf.to_crs(epsg=4326)
+            _ = gdf.sindex
+            return gdf
+        else:
+            st.error(f"Failed to fetch {file_url}. Status Code: {response.status_code}")
+            return None
+    except Exception as e:
+        st.error(f"Error accessing {file_url}: {e}")
         return None
 
+# Sidebar UI
 st.sidebar.header("Search & Analysis")
 address_input = st.sidebar.text_input("Address or Postal Code:", "243 Consumers Road, Toronto, Ontario")
 radius_km = st.sidebar.slider("Radius (km):", 1, 50, 1)
 selected_metric = st.sidebar.selectbox("Tooltip Metric:", list(metric_labels.keys()), format_func=lambda x: metric_labels[x])
 
+# Geocoding and Mapping
 geolocator = ArcGIS(user_agent="can_da_census_v15")
-
 if address_input:
     location = geolocator.geocode(f"{address_input.strip()}, Canada")
     if location:
@@ -70,7 +79,6 @@ if address_input:
         
         if base_da_gdf is not None:
             buffer_geom = gpd.GeoSeries([center_pt], crs="EPSG:4326").to_crs(epsg=3347).buffer(radius_km * 1000).to_crs(epsg=4326).iloc[0]
-            
             possible_matches_index = base_da_gdf.sindex.query(buffer_geom, predicate="intersects")
             intersecting_das = base_da_gdf.iloc[possible_matches_index].copy()
             intersecting_das = intersecting_das[intersecting_das.geometry.intersects(buffer_geom)]
@@ -91,15 +99,14 @@ if address_input:
             df = intersecting_das.copy()
             for col in metric_labels.keys():
                 df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0).astype(int)
-                
             df['DA Code'] = df['DAUID'].astype(str)
             totals = df[list(metric_labels.keys())].sum()
             totals_df = pd.DataFrame([totals], index=['GRAND TOTAL'])
             totals_df['DA Code'] = 'GRAND TOTAL'
-            
             final_df = pd.concat([df[['DA Code'] + list(metric_labels.keys())], totals_df])
 
             def highlight_row(row):
                 return ['font-weight: bold'] * len(row) if row['DA Code'] == str(subject_da_id) else [''] * len(row)
-
             st.dataframe(final_df.style.apply(highlight_row, axis=1), use_container_width=True)
+    else:
+        st.warning("Address not found. Please try a different location.")
