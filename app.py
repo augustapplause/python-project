@@ -11,7 +11,7 @@ import io
 
 # Page configuration
 st.set_page_config(layout="wide")
-st.title("Canadian DA Radius & Census Analytics")
+st.title("Canadian Census by DA")
 
 # Constants
 metric_labels = {
@@ -63,8 +63,8 @@ def load_provincial_sharded_data(province_name):
         return None
 
 # Sidebar UI
-st.sidebar.header("Search & Analysis")
-address_input = st.sidebar.text_input("Address or Postal Code:", "50 Victoria St, Gatineau, Quebec")
+st.sidebar.header("Inputs & Outputs")
+address_input = st.sidebar.text_input("Centre on Address or Postal Code:", "50 Victoria St, Gatineau, Quebec")
 # radius_km = st.sidebar.slider("Radius (km):", 1, 50, 1)
 radius_km = st.sidebar.slider("Radius (km):", 0.5, 10.0, 1.0, step=0.5)
 
