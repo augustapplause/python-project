@@ -45,7 +45,7 @@ def load_provincial_sharded_data(province_name):
     file_url = f"{base_url}da_province_{prov_id}.geojson"
     
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/122.0.0.0"
     }
     
     try:
@@ -65,7 +65,6 @@ def load_provincial_sharded_data(province_name):
 # Sidebar UI
 st.sidebar.header("Inputs & Outputs")
 address_input = st.sidebar.text_input("Centre on Address or Postal Code:", "50 Victoria St, Gatineau, Quebec")
-# radius_km = st.sidebar.slider("Radius (km):", 1, 50, 1)
 radius_km = st.sidebar.slider("Radius (km):", 0.5, 10.0, 1.0, step=0.5)
 
 selected_metric = st.sidebar.selectbox("Tooltip Metric:", list(metric_labels.keys()), format_func=lambda x: metric_labels[x])
@@ -94,21 +93,20 @@ if address_input:
             m = folium.Map(location=[location.latitude, location.longitude], zoom_start=13)
             folium.Circle([location.latitude, location.longitude], radius=radius_km*1000, color='red', fill=False).add_to(m)
             folium.Marker([location.latitude, location.longitude], icon=folium.Icon(color="red", icon="home")).add_to(m)
-            # 1 folium.GeoJson(intersecting_das, style_function=lambda x: {'fillColor': '#2980b9' if str(x['properties']['DAUID']) != str(subject_da_id) else '#e74c3c'},
-            # 2               tooltip=folium.GeoJsonTooltip(fields=['DAUID', selected_metric], aliases=['DA:', f'{metric_labels[selected_metric]}:'])).add_to(m)
-folium.GeoJson(
-    intersecting_das,
-    style_function=lambda x: {
-        'fillColor': '#2980b9' if str(x['properties']['DAUID']) != str(subject_da_id) else '#e74c3c',
-        'pointer-events': 'none'
-    },
-    tooltip=folium.GeoJsonTooltip(
-        fields=['DAUID', selected_metric], 
-        aliases=['DA:', f'{metric_labels[selected_metric]}:']
-    ),
-    popup=None
-).add_to(m)
-          
+            
+            folium.GeoJson(
+                intersecting_das,
+                style_function=lambda x: {
+                    'fillColor': '#2980b9' if str(x['properties']['DAUID']) != str(subject_da_id) else '#e74c3c',
+                    'pointer-events': 'none'
+                },
+                tooltip=folium.GeoJsonTooltip(
+                    fields=['DAUID', selected_metric], 
+                    aliases=['DA:', f'{metric_labels[selected_metric]}:']
+                ),
+                popup=None
+            ).add_to(m)
+            
             st_folium(m, width="100%", height=400)
 
             st.subheader("Mapped Dissemination Areas - 2021 Census (selected)")
