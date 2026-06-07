@@ -88,7 +88,7 @@ if address_input:
             subject_da_id = base_da_gdf[base_da_gdf.contains(center_pt)].iloc[0]['DAUID'] if not base_da_gdf[base_da_gdf.contains(center_pt)].empty else None
 
             st.sidebar.metric("DAs Identified", len(intersecting_das))
-            st.sidebar.metric(f"Total {metric_labels[selected_metric]}", f"{int(intersecting_das[selected_metric].sum()):,}")
+            st.sidebar.metric(f"Total of {metric_labels[selected_metric]}", f"{int(intersecting_das[selected_metric].sum()):,}")
 
             m = folium.Map(location=[location.latitude, location.longitude], zoom_start=13)
             folium.Circle([location.latitude, location.longitude], radius=radius_km*1000, color='red', fill=False).add_to(m)
