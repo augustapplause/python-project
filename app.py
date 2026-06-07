@@ -92,8 +92,7 @@ if address_input:
             folium.Circle([location.latitude, location.longitude], radius=radius_km*1000, color='red', fill=False).add_to(m)
             folium.Marker([location.latitude, location.longitude], icon=folium.Icon(color="red", icon="home")).add_to(m)
             
-            # Layer with CSS fix to prevent visual selection artifacts
-            geojson_layer = folium.GeoJson(
+            folium.GeoJson(
                 intersecting_das,
                 style_function=lambda x: {
                     'fillColor': '#2980b9' if str(x['properties']['DAUID']) != str(subject_da_id) else '#e74c3c',
@@ -101,18 +100,16 @@ if address_input:
                     'weight': 0.5,
                     'fillOpacity': 0.6
                 },
+                highlight_function=lambda x: {
+                    'fillOpacity': 0.6,
+                    'weight': 0.5
+                },
                 tooltip=folium.GeoJsonTooltip(
                     fields=['DAUID', selected_metric], 
                     aliases=['DA:', f'{metric_labels[selected_metric]}:']
                 ),
-            )
-            # Inject CSS to make shapes un-focusable/un-selectable to remove the rectangle
-            geojson_layer.add_child(folium.Element("""
-                <style>
-                    .leaflet-interactive { outline: none !important; }
-                </style>
-            """))
-            geojson_layer.add_to(m)
+                popup=None
+            ).add_to(m)
             
             st_folium(m, width="100%", height=400)
 
@@ -124,10 +121,4 @@ if address_input:
             totals = df[list(metric_labels.keys())].sum()
             totals_df = pd.DataFrame([totals], index=['GRAND TOTAL'])
             totals_df['DA Code'] = 'GRAND TOTAL'
-            final_df = pd.concat([df[['DA Code'] + list(metric_labels.keys())], totals_df])
-
-            def highlight_row(row):
-                return ['font-weight: bold'] * len(row) if row['DA Code'] == str(subject_da_id) else [''] * len(row)
-            st.dataframe(final_df.style.apply(highlight_row, axis=1), use_container_width=True)
-    else:
-        st.warning("Address not found. Please try a different location.")
+            final_df = pd.concat([df[['DA Code']
