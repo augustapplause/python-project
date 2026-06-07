@@ -121,4 +121,10 @@ if address_input:
             totals = df[list(metric_labels.keys())].sum()
             totals_df = pd.DataFrame([totals], index=['GRAND TOTAL'])
             totals_df['DA Code'] = 'GRAND TOTAL'
-            final_df = pd.concat([df[['DA Code']
+            final_df = pd.concat([df[['DA Code'] + list(metric_labels.keys())], totals_df])
+
+            def highlight_row(row):
+                return ['font-weight: bold'] * len(row) if row['DA Code'] == str(subject_da_id) else [''] * len(row)
+            st.dataframe(final_df.style.apply(highlight_row, axis=1), use_container_width=True)
+    else:
+        st.warning("Address not found. Please try a different location.")
