@@ -94,8 +94,11 @@ if address_input:
             m = folium.Map(location=[location.latitude, location.longitude], zoom_start=13)
             folium.Circle([location.latitude, location.longitude], radius=radius_km*1000, color='red', fill=False).add_to(m)
             folium.Marker([location.latitude, location.longitude], icon=folium.Icon(color="red", icon="home")).add_to(m)
-            folium.GeoJson(intersecting_das, style_function=lambda x: {'fillColor': '#2980b9' if str(x['properties']['DAUID']) != str(subject_da_id) else '#e74c3c'},
-                            tooltip=folium.GeoJsonTooltip(fields=['DAUID', selected_metric], aliases=['DA:', f'{metric_labels[selected_metric]}:'])).add_to(m)
+            #folium.GeoJson(intersecting_das, style_function=lambda x: {'fillColor': '#2980b9' if str(x['properties']['DAUID']) != str(subject_da_id) else '#e74c3c'},
+            #                tooltip=folium.GeoJsonTooltip(fields=['DAUID', selected_metric], aliases=['DA:', f'{metric_labels[selected_metric]}:'])).add_to(m)
+            folium.GeoJson(intersecting_das,style_function=lambda x: {'fillColor': '#2980b9' if str(x['properties']['DAUID']) != str(subject_da_id) else '#e74c3c'},
+    tooltip=folium.GeoJsonTooltip(fields=['DAUID', selected_metric], aliases=['DA:', f'{metric_labels[selected_metric]}:']), popup=None).add_to(m)
+          
             st_folium(m, width="100%", height=400)
 
             st.subheader("Mapped Dissemination Areas - 2021 Census (selected)")
